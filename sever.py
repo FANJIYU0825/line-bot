@@ -1,36 +1,35 @@
-from flask import (Flask, request , abort,render_template)
-from linebot import LineBotApi, WebhookHandler
+from flask import (Flask, render_template, request as rq, abort)
+from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import InvalidSignatureError
 
 
-app = Flask(__name__)
-
-line_bot_api = LineBotApi('8G0CdpifvSTnzWJRoK8sxDHEc67YxlLgPiaLLwk/rXO2s4+fyopQh48ioZBQa1g2Jm23JfCcqbz6XqFM/lhk9VaMJVwKHgKN0/C8J0WObTnhYHEn7T9c+0PZeh0Nppfl1s9Kg5/QyvTilXlkciH8xQdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('b584cdb1b112abe097e5a0da99903682') #b584cdb1b112abe097e5a0da99903682
-
-
+main_app = Flask(__name__, static_folder='.', static_url_path='')  #
+# main_app.debug = True
+line_bot_api = LineBotApi('rMF6DRuJRheVOnz7zPrtl7goR7xv46dMrFwlN0zCdh4EG7ptJFG658pV6Y07R8XtJm23JfCcqbz6XqFM/lhk9VaMJVwKHgKN0/C8J0WObTkSv6G1zeueYqH4PdEH+hyXBRuJb75yLf3eOJHOUCvX7AdB04t89/1O/w1cDnyilFU=')
+handler = WebhookHandler('b584cdb1b112abe097e5a0da99903682')  # ?  318797af646feaa757db0b6c6e08561c
 
 
-@app.route('/')
+@main_app.route('/', methods=["POST", "GET"])
 def index():
-    return render_template("index.html")
+	return render_template('index.html')  # main_app.send_static_file
 
-@app.route("/callback",methods = ['POST'])
+
+@main_app.route('/callback', methods=["POST", "GET"])
 def callback():
-    signature = request.headers['X-Line-Signature']
-    body = request.get_data(as_text =True)
+	signature = rq.headers['X-Line-Signature']
+	body = rq.get_data(as_text=True)
 
-    try:
-        handler.handle(body, signature)
+	try:
+		handler.handle(body, signature)
+	except InvalidSignatureError:
+		abort(400)
+	return 'OK'
 
-    except InvalidSignatureError:
-        abort(400)
-    
-    return 'Ok!!!'
 
 @handler.default()
 def default(event):
-    print('捕捉事件:',event )
+	print(f'{event} event catched')
 
-if __name__ =="__main__":
-    app.run(debug= True,host = "127.0.0.1",port=5000)
+
+if __name__ == "__main__":
+	main_app.run(debug=True)  # , host='127.0.0.1', port=80
