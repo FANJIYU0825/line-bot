@@ -1,3 +1,0 @@
-pip install line-bot-sdk
-pip install Flask
-pip install oauth2client
